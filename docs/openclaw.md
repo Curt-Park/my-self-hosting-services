@@ -112,15 +112,6 @@ The gateway requires device pairing for non-local connections by default. Since 
 
 This is safe when Authentik handles authentication in front of the gateway.
 
-### 8. Stop the local containers and remove volumes
-
-If any containers were started during the above steps, stop them and remove the Docker volumes before deploying via Portainer. The volumes created by `docker compose` have incorrect mount paths and must be recreated by Portainer:
-
-```bash
-docker compose down
-docker volume rm openclaw_openclaw-config openclaw_openclaw-workspace
-```
-
 ## Environment Variables
 
 Configure the following environment variables in Portainer when deploying:
