@@ -1,4 +1,4 @@
-# based on Clawdbot 2026.1.24
+# based on OpenClaw 2026.2.2
 ---
 networks:
   ingress:
@@ -6,39 +6,39 @@ networks:
     external: true
 
 volumes:
-  clawdbot-config:
+  openclaw-config:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/docker_volumes/clawdbot/config
+      device: ${HOME}/docker_volumes/openclaw/config
       o: bind
-  clawdbot-workspace:
+  openclaw-workspace:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/docker_volumes/clawdbot/workspace
+      device: ${HOME}/docker_volumes/openclaw/workspace
       o: bind
 
 services:
-  clawdbot-gateway:
-    image: ${CLAWDBOT_IMAGE:-clawdbot:local}
-    container_name: clawdbot-gateway
-    user: root # required for npm global installs (e.g. clawdhub, skills)
+  openclaw-gateway:
+    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    container_name: openclaw-gateway
+    user: root # required for npm global installs (e.g. clawhub, skills)
     labels:
       - traefik.enable=true
-      - traefik.http.routers.clawdbot.entrypoints=websecure
-      - traefik.http.routers.clawdbot.rule=Host(`clawdbot.${DOMAIN}`)
-      - traefik.http.routers.clawdbot.middlewares=authentik-proxy@docker
-      - traefik.http.services.clawdbot.loadbalancer.server.port=18789
+      - traefik.http.routers.openclaw.entrypoints=websecure
+      - traefik.http.routers.openclaw.rule=Host(`openclaw.${DOMAIN}`)
+      - traefik.http.routers.openclaw.middlewares=authentik-proxy@docker
+      - traefik.http.services.openclaw.loadbalancer.server.port=18789
     environment:
       HOME: /home/node
       TERM: xterm-256color
-      CLAWDBOT_GATEWAY_TOKEN: ${CLAWDBOT_GATEWAY_TOKEN}
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
       # includes Homebrew paths so the gateway process can find brew-installed tools
       PATH: /home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     volumes:
-      - clawdbot-config:/home/node/.clawdbot
-      - clawdbot-workspace:/home/node/clawd
+      - openclaw-config:/home/node/.openclaw
+      - openclaw-workspace:/home/node/.openclaw/workspace
     networks:
       - ingress
     init: true
@@ -52,9 +52,9 @@ services:
       - "--port"
       - "18789"
 
-  clawdbot-cli:
-    image: ${CLAWDBOT_IMAGE:-clawdbot:local}
-    container_name: clawdbot-cli
+  openclaw-cli:
+    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    container_name: openclaw-cli
     labels:
       - traefik.enable=false
     environment:
@@ -62,8 +62,8 @@ services:
       TERM: xterm-256color
       BROWSER: echo
     volumes:
-      - clawdbot-config:/home/node/.clawdbot
-      - clawdbot-workspace:/home/node/clawd
+      - openclaw-config:/home/node/.openclaw
+      - openclaw-workspace:/home/node/.openclaw/workspace
     networks:
       - ingress
     stdin_open: true

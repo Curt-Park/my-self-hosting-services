@@ -1,26 +1,27 @@
-# Clawdbot Setup
+# OpenClaw Setup
 
-[Clawdbot](https://docs.clawd.bot/) is a personal AI assistant that works across messaging channels (WhatsApp, Telegram, Discord, and more). The stack (`clawdbot.yaml`) deploys the gateway service with Traefik integration.
+[OpenClaw](https://openclaw.ai/) is a personal AI assistant that works across messaging channels (WhatsApp, Telegram, Discord, and more). The stack (`openclaw.yaml`) deploys the gateway service with Traefik integration.
 
-See also: [Clawdbot Docker installation](https://docs.clawd.bot/install/docker) | [Video guide](https://youtu.be/NhJxxv3f7lI?si=Vr38L2NWy2CPhSMa)
+See also: [OpenClaw Docker installation](https://docs.openclaw.ai/install/docker) | [Video guide](https://youtu.be/NhJxxv3f7lI?si=Vr38L2NWy2CPhSMa)
 
 ## Prerequisites
 
 - Network stack deployed ([network setup](network.md))
 - Create the volume directories:
+
   ```bash
-  mkdir -p ~/docker_volumes/clawdbot/{config,workspace}
+  mkdir -p ~/docker_volumes/openclaw/{config,workspace}
   ```
 
 ## Build and onboard
 
-These steps are performed in the **clawdbot repository**, not in this repo.
+These steps are performed in the **openclaw repository**, not in this repo.
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/clawdbot/clawdbot.git
-cd clawdbot
+git clone https://github.com/openclaw/openclaw.git
+cd openclaw
 ```
 
 ### 2. Fix `.dockerignore`
@@ -29,16 +30,17 @@ The upstream `.dockerignore` excludes directories needed by the build. Add these
 
 ```
 !vendor/a2ui/renderers/lit
-!apps/shared/ClawdbotKit/Tools/CanvasA2UI
+!apps/shared/OpenClawKit/Tools/CanvasA2UI
 ```
 
 ### 3. Build the Docker image
 
 ```bash
-docker build -t clawdbot:local -f Dockerfile .
+docker build -t openclaw:local -f Dockerfile .
 ```
 
 > **macOS note:** If the build fails with a keychain error, unlock the keychain first:
+>
 > ```bash
 > security -v unlock-keychain ~/Library/Keychains/login.keychain-db
 > ```
@@ -49,11 +51,12 @@ docker build -t clawdbot:local -f Dockerfile .
 openssl rand -hex 32
 ```
 
-Save this value — it will be used as `CLAWDBOT_GATEWAY_TOKEN`.
+Save this value — it will be used as `OPENCLAW_GATEWAY_TOKEN`.
 
 > If you lost the token, you can retrieve it from the config file after onboarding:
+>
 > ```bash
-> cat ~/docker_volumes/clawdbot/config/clawdbot.json | python3 -c "import sys,json; print(json.load(sys.stdin)['gateway']['auth']['token'])"
+> cat ~/docker_volumes/openclaw/config/openclaw.json | python3 -c "import sys,json; print(json.load(sys.stdin)['gateway']['auth']['token'])"
 > ```
 
 ### 5. Run onboarding
@@ -61,13 +64,14 @@ Save this value — it will be used as `CLAWDBOT_GATEWAY_TOKEN`.
 Set the config and workspace directories to point to the volume paths used by this project, then run the onboarding wizard:
 
 ```bash
-export CLAWDBOT_CONFIG_DIR=~/docker_volumes/clawdbot/config
-export CLAWDBOT_WORKSPACE_DIR=~/docker_volumes/clawdbot/workspace
-export CLAWDBOT_GATEWAY_TOKEN=<token from step 4>
-make clawdbot-cli ARGS="onboard --no-install-daemon"
+export OPENCLAW_CONFIG_DIR=~/docker_volumes/openclaw/config
+export OPENCLAW_WORKSPACE_DIR=~/docker_volumes/openclaw/workspace
+export OPENCLAW_GATEWAY_TOKEN=<token from step 4>
+make openclaw-cli ARGS="onboard --no-install-daemon"
 ```
 
 When prompted during onboarding:
+
 - Gateway bind: `lan`
 - Gateway auth: `token`
 - Gateway token: paste the token from step 4
@@ -75,26 +79,26 @@ When prompted during onboarding:
 - Install Gateway daemon: `No`
 - Enable hooks: `Yes` (accept the defaults)
 
-The wizard also configures your AI provider credentials, which are stored in the config directory (`~/docker_volumes/clawdbot/config`).
+The wizard also configures your AI provider credentials, which are stored in the config directory (`~/docker_volumes/openclaw/config`).
 
-> **Note:** The health check failure at the end of onboarding is expected — the gateway is not running during onboarding. The dashboard URLs shown are temporary and only apply to the CLI container. After deploying via Portainer, access the Control UI at `https://clawdbot.<your-domain>/`.
+> **Note:** The health check failure at the end of onboarding is expected — the gateway is not running during onboarding. The dashboard URLs shown are temporary and only apply to the CLI container. After deploying via Portainer, access the Control UI at `https://openclaw.<your-domain>/`.
 
 ### 6. Set up providers (optional)
 
-Use `make clawdbot-cli` to run CLI commands:
+Use `make openclaw-cli` to run CLI commands:
 
 ```bash
-make clawdbot-cli ARGS="--help"            # show available commands
-make clawdbot-cli ARGS="channels login"    # link WhatsApp Web (QR)
-make clawdbot-cli ARGS="status"            # show channel health
-make clawdbot-cli ARGS="doctor"            # health checks + quick fixes
+make openclaw-cli ARGS="--help"            # show available commands
+make openclaw-cli ARGS="channels login"    # link WhatsApp Web (QR)
+make openclaw-cli ARGS="status"            # show channel health
+make openclaw-cli ARGS="doctor"            # health checks + quick fixes
 ```
 
-See also: [Clawdbot CLI documentation](https://docs.clawd.bot/cli)
+See also: [OpenClaw CLI documentation](https://docs.clawd.bot/cli)
 
 ### 7. Configure Control UI for reverse proxy access
 
-The gateway requires device pairing for non-local connections by default. Since the gateway runs behind Traefik, the Control UI will not recognize connections as local. Add the following to `~/docker_volumes/clawdbot/config/clawdbot.json` inside the `gateway` object:
+The gateway requires device pairing for non-local connections by default. Since the gateway runs behind Traefik, the Control UI will not recognize connections as local. Add the following to `~/docker_volumes/openclaw/config/openclaw.json` inside the `gateway` object:
 
 ```json
 "controlUi": {
@@ -114,7 +118,7 @@ If any containers were started during the above steps, stop them and remove the 
 
 ```bash
 docker compose down
-docker volume rm clawdbot_clawdbot-config clawdbot_clawdbot-workspace
+docker volume rm openclaw_openclaw-config openclaw_openclaw-workspace
 ```
 
 ## Environment Variables
@@ -123,27 +127,28 @@ Configure the following environment variables in Portainer when deploying:
 
 | Variable | Description | How to get |
 |---|---|---|
-| `HOME` | Home directory path (e.g. `/Users/<username>`) | Required for volume mount paths — other stacks inherit this automatically, but Clawdbot requires it explicitly |
+| `HOME` | Home directory path (e.g. `/Users/<username>`) | Required for volume mount paths — other stacks inherit this automatically, but openclaw requires it explicitly |
 | `DOMAIN` | Your domain name | Same as other stacks |
-| `CLAWDBOT_GATEWAY_TOKEN` | Gateway authentication token | Generated in step 4 |
+| `OPENCLAW_GATEWAY_TOKEN` | Gateway authentication token | Generated in step 4 |
 
 The AI provider credentials (`CLAUDE_AI_SESSION_KEY`, `CLAUDE_WEB_SESSION_KEY`, `CLAUDE_WEB_COOKIE`) are optional environment variable overrides. The onboarding wizard stores credentials in the config directory, so these do not need to be set if onboarding was completed.
 
 ## Deploy
 
-Follow the [deploy on Portainer](deploy-on-portainer.md) guide with **Compose path** set to `clawdbot.yaml`.
+Follow the [deploy on Portainer](deploy-on-portainer.md) guide with **Compose path** set to `openclaw.yaml`.
 
-After deploying, the Control UI is accessible at `https://clawdbot.<your-domain>/`.
+After deploying, the Control UI is accessible at `https://openclaw.<your-domain>/`.
 
 ## Authentication
 
-After setting up [Authentik](authentication.md), [register Clawdbot as an app](register-app-authentik.md).
+After setting up [Authentik](authentication.md), [register OpenClaw as an app](register-app-authentik.md).
 
 ## Volume
 
-Clawdbot data is stored at:
-- `$HOME/docker_volumes/clawdbot/config` — configuration, credentials, and session data
-- `$HOME/docker_volumes/clawdbot/workspace` — workspace files
+OpenClaw data is stored at:
+
+- `$HOME/docker_volumes/openclaw/config` — configuration, credentials, and session data
+- `$HOME/docker_volumes/openclaw/workspace` — workspace files
 
 ## Docker Limitations
 
@@ -159,20 +164,20 @@ Clawdbot data is stored at:
 To open a shell inside the gateway container:
 
 ```bash
-docker exec -it clawdbot-gateway bash
+docker exec -it openclaw-gateway bash
 ```
 
-Or via Portainer: **Containers** → **clawdbot-gateway** → **Console** → **Connect**.
+Or via Portainer: **Containers** → **openclaw-gateway** → **Console** → **Connect**.
 
 The following sections assume you are attached to the container.
 
 ### Installing ClawdHub
 
-[ClawdHub](https://docs.clawd.bot/tools/clawdhub) is the public skill registry for Clawdbot:
+[ClawHub](https://docs.openclaw.ai/tools/clawhub) is the public skill registry for OpenClaw:
 
 ```bash
-# Attach to clawdbot-gateway and run:
-npm i -g clawdhub undici
+# Attach to openclaw-gateway and run:
+npm i -g clawhub undici
 ```
 
 > **Note:** Global npm packages will be lost when the container is recreated. Re-run after redeployment.
@@ -180,9 +185,9 @@ npm i -g clawdhub undici
 Usage:
 
 ```bash
-clawdhub search "<query>"
-clawdhub install <skill-slug>
-clawdhub update --all
+clawhub search "<query>"
+clawhub install <skill-slug>
+clawhub update --all
 ```
 
 ### Installing Homebrew
@@ -190,7 +195,7 @@ clawdhub update --all
 The gateway container (Debian-based) does not include Homebrew. To install it:
 
 ```bash
-# Attach to clawdbot-gateway and run:
+# Attach to openclaw-gateway and run:
 apt-get update && apt-get install -y build-essential procps curl file git
 NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
