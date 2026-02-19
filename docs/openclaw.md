@@ -13,39 +13,9 @@ See also: [OpenClaw Docker installation](https://docs.openclaw.ai/install/docker
   mkdir -p ~/docker_volumes/openclaw/{config,workspace}
   ```
 
-## Build and onboard
+## Onboard
 
-These steps are performed in the **openclaw repository**, not in this repo.
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/openclaw/openclaw.git
-cd openclaw
-```
-
-### 2. Fix `.dockerignore`
-
-The upstream `.dockerignore` excludes directories needed by the build. Add these negation rules to the end of `.dockerignore`:
-
-```
-!vendor/a2ui/renderers/lit
-!apps/shared/OpenClawKit/Tools/CanvasA2UI
-```
-
-### 3. Build the Docker image
-
-```bash
-docker build -t openclaw:local -f Dockerfile .
-```
-
-> **macOS note:** If the build fails with a keychain error, unlock the keychain first:
->
-> ```bash
-> security -v unlock-keychain ~/Library/Keychains/login.keychain-db
-> ```
-
-### 4. Generate the gateway token
+### 1. Generate the gateway token
 
 ```bash
 openssl rand -hex 32
@@ -59,7 +29,7 @@ Save this value — it will be used as `OPENCLAW_GATEWAY_TOKEN`.
 > cat ~/docker_volumes/openclaw/config/openclaw.json | python3 -c "import sys,json; print(json.load(sys.stdin)['gateway']['auth']['token'])"
 > ```
 
-### 5. Run onboarding
+### 2. Run onboarding
 
 Set the config and workspace directories to point to the volume paths used by this project, then run the onboarding wizard:
 
@@ -83,7 +53,7 @@ The wizard also configures your AI provider credentials, which are stored in the
 
 > **Note:** The health check failure at the end of onboarding is expected — the gateway is not running during onboarding. The dashboard URLs shown are temporary and only apply to the CLI container. After deploying via Portainer, access the Control UI at `https://openclaw.<your-domain>/`.
 
-### 6. Set up providers (optional)
+### 3. Set up providers (optional)
 
 Use `make openclaw-cli` to run CLI commands:
 
@@ -96,7 +66,7 @@ make openclaw-cli ARGS="doctor"            # health checks + quick fixes
 
 See also: [OpenClaw CLI documentation](https://docs.clawd.bot/cli)
 
-### 7. Configure Control UI for reverse proxy access
+### 4. Configure Control UI for reverse proxy access
 
 The gateway requires device pairing for non-local connections by default. Since the gateway runs behind Traefik, the Control UI will not recognize connections as local. Add the following to `~/docker_volumes/openclaw/config/openclaw.json` inside the `gateway` object:
 
@@ -111,6 +81,15 @@ The gateway requires device pairing for non-local connections by default. Since 
 - `dangerouslyDisableDeviceAuth` — skips device pairing, allowing access with the gateway token alone
 
 This is safe when Authentik handles authentication in front of the gateway.
+
+### 5. Stop the local containers and remove volumes
+
+If any containers were started during the above steps, stop them and remove the Docker volumes before deploying via Portainer. The volumes created by `docker compose` have incorrect mount paths and must be recreated by Portainer:
+
+```bash
+docker compose down
+docker volume rm openclaw_openclaw-config openclaw_openclaw-workspace
+```
 
 ## Environment Variables
 
