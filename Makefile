@@ -18,8 +18,8 @@ service-down:
 	COMPOSE_PROJECT_NAME=$(STACK_NAME) docker compose -f $(STACK_NAME).yaml --env-file .env down
 	COMPOSE_PROJECT_NAME=$(STACK_NAME) docker compose -f $(STACK_NAME).yaml --env-file .env rm
 
-clawdbot-cli:
-	COMPOSE_PROJECT_NAME=clawdbot docker compose -f clawdbot.yaml --profile cli --env-file .env run --rm clawdbot-cli $(ARGS)
+openclaw-cli:
+	COMPOSE_PROJECT_NAME=openclaw docker compose -f openclaw.yaml --profile cli --env-file .env run --rm openclaw-cli $(ARGS)
 
 show-docker:
 	 docker run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh
