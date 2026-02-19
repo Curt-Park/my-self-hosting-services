@@ -13,7 +13,7 @@ See also: [OpenClaw Docker installation](https://docs.openclaw.ai/install/docker
   mkdir -p ~/docker_volumes/openclaw/{config,workspace}
   ```
 
-## Nnboard
+## Onboard
 
 ### 1. Generate the gateway token
 
