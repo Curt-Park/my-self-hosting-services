@@ -1,4 +1,4 @@
-# based on OpenClaw 2026.2.2
+
 ---
 networks:
   ingress:
@@ -21,7 +21,7 @@ volumes:
 
 services:
   openclaw-gateway:
-    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    image: alpine/openclaw:2026.2.17
     container_name: openclaw-gateway
     user: root # required for npm global installs (e.g. clawhub, skills)
     labels:
@@ -53,7 +53,7 @@ services:
       - "18789"
 
   openclaw-cli:
-    image: ${OPENCLAW_IMAGE:-openclaw:local}
+    image: alpine/openclaw:2026.2.17
     container_name: openclaw-cli
     labels:
       - traefik.enable=false
